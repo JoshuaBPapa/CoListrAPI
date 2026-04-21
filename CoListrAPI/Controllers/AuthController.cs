@@ -1,4 +1,7 @@
+using CoListrAPI.Domain.Auth;
+using CoListrAPI.Domain.Result;
 using CoListrAPI.DTOs.Auth;
+using CoListrAPI.DTOs.User;
 using CoListrAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -39,18 +42,7 @@ namespace CoListrAPI.Controllers
             }
             );
 
-            Response.Cookies.Append("refreshToken", result.Value!.RefreshToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddDays(int.Parse(_configuration["Jwt:RefreshTokenDaysExpiry"]!)),
-            });
-
-            return Ok(new
-            {
-                accessToken = result.Value.AccessToken
-            });
+            return SuccessfulAuthResponse(result);
         }
 
         [HttpPost("login")]
@@ -60,7 +52,12 @@ namespace CoListrAPI.Controllers
 
             if (result.Error == "Invalid username or password") return Unauthorized();
 
-            Response.Cookies.Append("refreshToken", result.Value!.RefreshToken, new CookieOptions
+            return SuccessfulAuthResponse(result);
+        }
+
+        public ActionResult<AuthResponseDto> SuccessfulAuthResponse(Result<AuthResult> result)
+        {
+            Response.Cookies.Append("refreshToken", result.Value!.TokenPair.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
@@ -68,9 +65,18 @@ namespace CoListrAPI.Controllers
                 Expires = DateTimeOffset.UtcNow.AddDays(int.Parse(_configuration["Jwt:RefreshTokenDaysExpiry"]!)),
             });
 
+            var User = new UserResponseDto
+            {
+                FirstName = result.Value.User.FirstName,
+                LastName = result.Value.User.LastName,
+                Username = result.Value.User.Username,
+                ShareCode = result.Value.User.ShareCode
+            };
+
             return Ok(new
             {
-                accessToken = result.Value.AccessToken
+                accessToken = result.Value.TokenPair.AccessToken,
+                user = User
             });
         }
     }

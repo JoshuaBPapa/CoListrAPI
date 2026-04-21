@@ -20,12 +20,12 @@ namespace CoListrAPI.Services
             _passwordHasher = passwordHasher;
         }
 
-        public async Task<Result<TokenPair>> SignUpAsync(AuthSignUpDto dto, CancellationToken cancellationToken)
+        public async Task<Result<AuthResult>> SignUpAsync(AuthSignUpDto dto, CancellationToken cancellationToken)
         {
             var existingUser = await _users.GetByUsernameAsync(dto.Username, cancellationToken);
             if (existingUser != null)
             {
-                return new Result<TokenPair>
+                return new Result<AuthResult>
                 {
                     IsSuccess = false,
                     Value = null,
@@ -56,17 +56,21 @@ namespace CoListrAPI.Services
 
             var tokenPair = _jwtTokenService.GenerateTokenPair(user.Id.ToString());
 
-            return new Result<TokenPair>
+            return new Result<AuthResult>
             {
                 IsSuccess = true,
-                Value = tokenPair,
+                Value = new AuthResult
+                (
+                    tokenPair,
+                    user
+                ),
                 Error = null
             };
         }
 
-        public async Task<Result<TokenPair>> LoginAsync(AuthLoginDto dto, CancellationToken cancellationToken)
+        public async Task<Result<AuthResult>> LoginAsync(AuthLoginDto dto, CancellationToken cancellationToken)
         {
-            var result = new Result<TokenPair>
+            var result = new Result<AuthResult>
             {
                 IsSuccess = false,
                 Value = null,
@@ -80,11 +84,16 @@ namespace CoListrAPI.Services
 
             var tokenPair = _jwtTokenService.GenerateTokenPair(existingUser.Id.ToString());
 
-            result.IsSuccess = true;
-            result.Value = tokenPair;
-            result.Error = null;
-
-            return result;
+            return new Result<AuthResult>
+            {
+                IsSuccess = true,
+                Value = new AuthResult
+                (
+                    tokenPair,
+                    existingUser
+                ),
+                Error = null
+            };
         }
 
         public string HashPassword(User user, string password) 

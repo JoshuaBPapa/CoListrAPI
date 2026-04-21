@@ -7,8 +7,8 @@ namespace CoListrAPI.Services
 {
     public interface IAuthService
     {
-        Task<Result<TokenPair>> SignUpAsync(AuthSignUpDto dto, CancellationToken cancellationToken);
-        Task<Result<TokenPair>> LoginAsync(AuthLoginDto dto, CancellationToken cancellationToken);
+        Task<Result<AuthResult>> SignUpAsync(AuthSignUpDto dto, CancellationToken cancellationToken);
+        Task<Result<AuthResult>> LoginAsync(AuthLoginDto dto, CancellationToken cancellationToken);
         string HashPassword(User user, string password);
         bool VerifyHashedPassword(User user, string providedPassword);
     }
