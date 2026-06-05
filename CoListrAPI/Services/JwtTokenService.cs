@@ -51,5 +51,47 @@ namespace CoListrAPI.Services
 
             return new TokenPair(accessToken, refreshToken);
         }
+
+        public string GetUserIdFromToken(string jwt)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(jwt);
+            var userId = token.Claims.First(claim => claim.Type == JwtRegisteredClaimNames.Sub).Value;
+
+            return userId;
+        }
+
+        public bool CheckIfTokenValid(string token)
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = _configuration["Jwt:Issuer"],
+                ValidateAudience = true,
+                ValidAudience = _configuration["Jwt:Audience"],
+                IssuerSigningKey = key,
+                ValidateIssuerSigningKey = true,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public string GenerateAccessTokenFromRefreshToken(string refreshToken)
+        {
+            return GenerateToken(GetUserIdFromToken(refreshToken), TokenType.AccessToken);
+        }
     }
 }

@@ -17,9 +17,10 @@ namespace CoListrAPI.Data
             return await _context.Set<TEntity>().ToListAsync(cancellationToken);
         }
 
-        public async Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<TEntity?> GetByIdAsync(string id, CancellationToken cancellationToken)
         {
-            return await _context.Set<TEntity>().FindAsync([id], cancellationToken);
+            var guid = Guid.Parse(id);
+            return await _context.Set<TEntity>().FindAsync([guid], cancellationToken);
         }
 
         public async Task Add(TEntity entity, CancellationToken cancellationToken)

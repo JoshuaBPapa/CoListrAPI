@@ -15,11 +15,15 @@ namespace CoListrAPI.Controllers
     {
         private readonly IAuthService _authService;
         private readonly IConfiguration _configuration;
+        private readonly IJwtTokenService _jwtTokenService;
+        private readonly IWebHostEnvironment _environment;
 
-        public AuthController(IAuthService AuthService, IConfiguration configuration)
+        public AuthController(IAuthService authService, IConfiguration configuration, IJwtTokenService jwtTokenService, IWebHostEnvironment environment)
         {
-            _authService = AuthService;
+            _authService = authService;
             _configuration = configuration;
+            _jwtTokenService = jwtTokenService;
+            _environment = environment;
         }
 
         [HttpPost("signup")]
@@ -61,12 +65,13 @@ namespace CoListrAPI.Controllers
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = _environment.IsDevelopment() ? SameSiteMode.None : SameSiteMode.Lax,
                 Expires = DateTimeOffset.UtcNow.AddDays(int.Parse(_configuration["Jwt:RefreshTokenDaysExpiry"]!)),
             });
 
             var User = new UserResponseDto
             {
+                Id = result.Value.User.Id,
                 FirstName = result.Value.User.FirstName,
                 LastName = result.Value.User.LastName,
                 Username = result.Value.User.Username,
@@ -77,6 +82,21 @@ namespace CoListrAPI.Controllers
             {
                 accessToken = result.Value.TokenPair.AccessToken,
                 user = User
+            });
+        }
+
+        [HttpGet("token")]
+        public ActionResult<AccessTokenRefreshResponseDto> AccessTokenRefresh()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+
+            if (string.IsNullOrEmpty(refreshToken) || !_jwtTokenService.CheckIfTokenValid(refreshToken)) return Unauthorized();
+
+            var newAccessToken = _jwtTokenService.GenerateAccessTokenFromRefreshToken(refreshToken);
+
+            return Ok(new
+            {
+                AccessToken = newAccessToken
             });
         }
     }
