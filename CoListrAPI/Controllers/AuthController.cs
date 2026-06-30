@@ -99,5 +99,21 @@ namespace CoListrAPI.Controllers
                 AccessToken = newAccessToken
             });
         }
+
+        [HttpPost("logout")]
+        public ActionResult Logout()
+        {
+            if (Request.Cookies["refreshToken"] != null)
+            {
+                Response.Cookies.Delete("refreshToken", new CookieOptions
+                {
+                    SameSite = _environment.IsDevelopment() ? SameSiteMode.None : SameSiteMode.Lax,
+                    Secure = true,
+                    HttpOnly = true
+                });
+            }
+
+            return NoContent();
+        }
     }
 }
