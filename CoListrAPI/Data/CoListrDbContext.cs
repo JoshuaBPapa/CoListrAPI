@@ -23,12 +23,13 @@ namespace CoListrAPI.Data
 
             foreach (var entityEntry in entries)
             {
+                if (entityEntry.Entity is not BaseEntityDateTime) continue;
 
-                ((BaseEntity)entityEntry.Entity).UpdatedAt = now;
+                    ((BaseEntityDateTime)entityEntry.Entity).UpdatedAt = now;
 
                 if (entityEntry.State == EntityState.Added)
                 {
-                    ((BaseEntity)entityEntry.Entity).CreatedAt = now;
+                    ((BaseEntityDateTime)entityEntry.Entity).CreatedAt = now;
                 }
             }
 

@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace CoListrAPI.DTOs.User
+﻿namespace CoListrAPI.DTOs.User
 {
     public class UserResponseDto
     {

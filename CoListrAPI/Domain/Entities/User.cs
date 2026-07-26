@@ -2,7 +2,7 @@
 
 namespace CoListrAPI.Domain.Entities
 {
-    public class User : BaseEntity
+    public class User : BaseEntityDateTime
     {
         [Required]
         [MaxLength(250)]
