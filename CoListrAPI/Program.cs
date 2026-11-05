@@ -54,9 +54,13 @@ builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+builder.Services.AddScoped<IShoppingListRepository, ShoppingListRepository>();
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<IShoppingListService, ShoppingListService>();
 
 var app = builder.Build();
 

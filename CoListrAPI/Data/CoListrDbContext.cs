@@ -10,6 +10,15 @@ namespace CoListrAPI.Data
         }
 
         public DbSet<User> Users { get; set; } = null!;
+        public DbSet<ShoppingList> ShoppingLists { get; set; } = null!;
+        public DbSet<ShoppingListUser> ShoppingListUser { get; set; } = null!;
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            
+            modelBuilder.Entity<ShoppingListUser>().HasKey(slu => new { slu.ShoppingListId, slu.UserId });
+        }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
@@ -25,7 +34,7 @@ namespace CoListrAPI.Data
             {
                 if (entityEntry.Entity is not BaseEntityDateTime) continue;
 
-                    ((BaseEntityDateTime)entityEntry.Entity).UpdatedAt = now;
+                ((BaseEntityDateTime)entityEntry.Entity).UpdatedAt = now;
 
                 if (entityEntry.State == EntityState.Added)
                 {

@@ -23,10 +23,12 @@ namespace CoListrAPI.Data
             return await _context.Set<TEntity>().FindAsync([guid], cancellationToken);
         }
 
-        public async Task Add(TEntity entity, CancellationToken cancellationToken)
+        public async Task<Guid> Add(TEntity entity, CancellationToken cancellationToken)
         {
             _context.Set<TEntity>().Add(entity);
             await _context.SaveChangesAsync(cancellationToken);
+
+            return entity.Id;
         }
 
         public async Task Update(TEntity entity, CancellationToken cancellationToken)
